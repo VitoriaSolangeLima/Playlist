@@ -39,10 +39,29 @@ app.MapPost("/Musica", (JasonElement body ) =>
     Musica.Artista = body.GetProperty("artista").GetString()?? "";
     Musica.Ano = body.GetProperty("ano").GetInt16()?? "";
 
-    
+    listamusicas[totalmusicas] = musica;
+    totalmusicas++;
+
+    return Results.Ok(new{musica});
 
 });
 
+app.MapGet("/Listar", () => 
+{
+    Musica[] musicascadastradas = new Musica[totalmusicas];
+
+    for(int i =0; i < totalmusicas; i++){
+        musicascadastradas[i] = listamusicas[i];
+    }
+     return Results.Ok(new{musicascadastradas});
+
+});
+
+app.MapGet("/Musica/Buscartitulo", (String titulo ) => 
+{
+    var filtro new System.Collections.Generic.List<Musica>();
+    
+});
 // Inicia o servidor web é iniciado e passa a aguardar requisições HTTP dos clientes
 app.Run();
 
