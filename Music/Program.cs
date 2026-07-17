@@ -29,8 +29,10 @@ int totalmusicas = 0;
 // Definição de rotas HTTP do tipo GET 
 app.MapPost("/Musica", (JasonElement body ) => 
 {
-    Random random = new();
-    Musica[] musica = new 
+    Random random = new ();
+    Musica musica = new Musica();
+
+    
 
 });
 
