@@ -8,8 +8,20 @@ var builder = WebApplication.CreateBuilder(args);
 // Define o endereço e a porta em que a aplicação irá escutar requisições HTTP
 builder.WebHost.UseUrls("http://localhost:8000");
 
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
 // Constrói a aplicação web a partir das configurações definidas no builder
 var app = builder.Build();
+
+app.UseCors("AllowAll");
 
 Musica[] listamusicas = new Musicas[100];
 int totalmusicas = 0;
