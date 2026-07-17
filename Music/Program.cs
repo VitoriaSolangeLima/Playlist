@@ -32,9 +32,14 @@ app.MapPost("/Musica", (JasonElement body ) =>
     Random random = new ();
     Musica musica = new Musica();
 
-    Musica.
+    Musica.Id = random.Next(1000, 9999);
+    Musica.Titulo = body.GetProperty("titulo").GetString()?? "";
+    Musica.Compositor = body.GetProperty("compositor").GetString()?? "";
+    Musica.Genero = body.GetProperty("genero").GetString()?? "";
+    Musica.Artista = body.GetProperty("artista").GetString()?? "";
+    Musica.Ano = body.GetProperty("ano").GetInt16()?? "";
 
-
+    
 
 });
 
