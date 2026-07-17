@@ -32,7 +32,9 @@ app.MapPost("/Musica", (JasonElement body ) =>
     Random random = new ();
     Musica musica = new Musica();
 
-    
+    Musica.
+
+
 
 });
 
