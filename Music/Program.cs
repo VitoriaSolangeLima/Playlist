@@ -57,10 +57,21 @@ app.MapGet("/Listar", () =>
 
 });
 
+
+//Busca por titulo
 app.MapGet("/Musica/Buscartitulo", (String titulo ) => 
 {
     var filtro new System.Collections.Generic.List<Musica>();
     
+    for (int i = 0; i < totalmusicas; i++)
+    {
+        if (listamusicas[i].Titulo.Contains(titulo, StringComparison.OrdinalIgnoreCase))
+        {
+            filtro.Add(listamusicas[i]);
+        }
+    }
+    
+    return Results.Ok(new { musica = filtrado });
 });
 // Inicia o servidor web é iniciado e passa a aguardar requisições HTTP dos clientes
 app.Run();
