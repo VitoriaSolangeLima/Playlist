@@ -27,7 +27,7 @@ Musica[] listamusicas = new Musicas[100];
 int totalmusicas = 0;
 
 // Definição de rotas HTTP do tipo GET 
-app.MapPost("/Musica", (JasonElement body ) => 
+app.MapPost("/CadastrarMusica", (JasonElement body ) => 
 {
     Random random = new ();
     Musica musica = new Musica();
@@ -72,6 +72,26 @@ app.MapGet("/Musica/Buscartitulo", (String titulo ) =>
     }
     
     return Results.Ok(new { musica = filtrado });
+});
+//Deletar Música
+app.MapDelete("DeletarMusica/{titulo}", (String titulo)=>
+{
+    var M = listamusicas.Find(musica => Musica.titulo == titulo)
+
+    if(M == null)
+    {
+        return Results.NotFound(new
+        {
+			erro = "Musica não encontrada."
+        });
+    }
+
+    listamusicas.Remove(M)
+
+    return Results.Ok(new
+    {
+		mensagem = "Musica removida com sucesso."
+    });
 });
 // Inicia o servidor web é iniciado e passa a aguardar requisições HTTP dos clientes
 app.Run();
