@@ -73,10 +73,30 @@ app.MapGet("/Musica/Buscartitulo", (String titulo ) =>
     
     return Results.Ok(new { musica = filtrado });
 });
-//Deletar Música
-app.MapDelete("DeletarMusica/{id}", (int id)=>
+//Atualizar Musica
+app.Mappatch("/AtualizarMusica/{id}/titulo", (int id, String novoTitulo) =>
 {
-    var M = listamusicas.Find(musica => Musica.id == id)
+    var M = listamusicas.Find(musica => musica.id == id);
+     
+    if(M == null)
+    {
+        return Results.NotFound(new
+        {
+			erro = "Musica não encontrada."
+        });
+    }
+
+    M.titulo = novoTitulo;
+
+    return Results.Ok(new
+    {
+        mensagem = "Título atualizado com sucesso.",
+    });
+});
+//Deletar Música
+app.MapDelete("/DeletarMusica/{id}", (int id)=>
+{
+    var M = listamusicas.Find(musica => musica.id == id);
 
     if(M == null)
     {
@@ -86,7 +106,7 @@ app.MapDelete("DeletarMusica/{id}", (int id)=>
         });
     }
 
-    listamusicas.Remove(M)
+    listamusicas.Remove(M);
 
     return Results.Ok(new
     {
