@@ -74,9 +74,9 @@ app.MapGet("/Musica/Buscartitulo", (String titulo ) =>
     return Results.Ok(new { musica = filtrado });
 });
 //Deletar Música
-app.MapDelete("DeletarMusica/{titulo}", (String titulo)=>
+app.MapDelete("DeletarMusica/{id}", (int id)=>
 {
-    var M = listamusicas.Find(musica => Musica.titulo == titulo)
+    var M = listamusicas.Find(musica => Musica.id == id)
 
     if(M == null)
     {
