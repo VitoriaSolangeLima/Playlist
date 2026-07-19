@@ -26,7 +26,7 @@ app.UseCors("AllowAll");
 Musica[] listamusicas = new Musicas[100];
 int totalmusicas = 0;
 
-// Definição de rotas HTTP do tipo GET 
+// Definição de rotas HTTP do tipo POST 
 app.MapPost("/CadastrarMusica", (JasonElement body ) => 
 {
     Random random = new ();
@@ -46,6 +46,8 @@ app.MapPost("/CadastrarMusica", (JasonElement body ) =>
 
 });
 
+
+//Listagem
 app.MapGet("/Listar", () => 
 {
     Musica[] musicascadastradas = new Musica[totalmusicas];
@@ -58,23 +60,46 @@ app.MapGet("/Listar", () =>
 });
 
 
-//Busca por titulo
-app.MapGet("/Musica/Buscartitulo", (String titulo ) => 
-{
-    var filtro new System.Collections.Generic.List<Musica>();
+//Busca 
+app.MapGet("/BuscarMusica", (string? artista, string? compositor, string? genero, int? ano) =>{
+    var filtro = new System.Collections.Generic.List<Funcionario>();
     
-    for (int i = 0; i < totalmusicas; i++)
-    {
-        if (listamusicas[i].Titulo.Contains(titulo, StringComparison.OrdinalIgnoreCase))
-        {
-            filtro.Add(listamusicas[i]);
+    for (int i = 0; i < totalmusicas; i++){
+        var f = listamusicas[i];
+        bool corresponde = true;
+
+        if (!string.IsNullOrEmpty(artista) && !f.Artista.Contains(artista, StringComparison.OrdinalIgnoreCase)){
+            corresponde = false;
+        }
+
+        if (!string.IsNullOrEmpty(compositor) && !f.Compositor.Contains(compositor, StringComparison.OrdinalIgnoreCase)){
+            corresponde = false;
+        }
+
+        if (!string.IsNullOrEmpty(genero) && !f.Genero.Contains(genero, StringComparison.OrdinalIgnoreCase)){
+            corresponde = false;
+        }
+
+        if (ano.HasValue && f.Ano != ano.Value){
+            corresponde = false;
+        }
+
+        if (corresponde){
+            filtro.Add(f);
         }
     }
     
-    return Results.Ok(new { musica = filtrado });
+    return Results.Ok(new { musica = filtro });
 });
+
 //Atualizar Musica
 app.Mappatch("/AtualizarMusica/{id}/titulo", (int id, String novoTitulo) =>
+
+
+
+//Deletar Música
+app.MapDelete("DeletarMusica/{titulo}", (String titulo)=>
+(Ao infinito e além das minhas capacidades. Basicamente era para acontecer o seguinte, o usuario digitaria em um dos campos, ao buscar os campos vazios vão ser ignorados e vai focar no que foi preenchido. por isso usamos o IsNullOrEmpty e o HasValue)
 {
     var M = listamusicas.Find(musica => musica.id == id);
      
@@ -115,4 +140,3 @@ app.MapDelete("/DeletarMusica/{id}", (int id)=>
 });
 // Inicia o servidor web é iniciado e passa a aguardar requisições HTTP dos clientes
 app.Run();
-
