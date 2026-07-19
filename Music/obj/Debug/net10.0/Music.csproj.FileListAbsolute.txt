@@ -1,0 +1,9 @@
+/workspaces/Playlist/Music/obj/Debug/net10.0/Music.csproj.AssemblyReference.cache
+/workspaces/Playlist/Music/obj/Debug/net10.0/rpswa.dswa.cache.json
+/workspaces/Playlist/Music/obj/Debug/net10.0/Music.GeneratedMSBuildEditorConfig.editorconfig
+/workspaces/Playlist/Music/obj/Debug/net10.0/Music.AssemblyInfoInputs.cache
+/workspaces/Playlist/Music/obj/Debug/net10.0/Music.AssemblyInfo.cs
+/workspaces/Playlist/Music/obj/Debug/net10.0/Music.csproj.CoreCompileInputs.cache
+/workspaces/Playlist/Music/obj/Debug/net10.0/Music.MvcApplicationPartsAssemblyInfo.cs
+/workspaces/Playlist/Music/obj/Debug/net10.0/Music.MvcApplicationPartsAssemblyInfo.cache
+/workspaces/Playlist/Music/obj/Debug/net10.0/Music.sourcelink.json

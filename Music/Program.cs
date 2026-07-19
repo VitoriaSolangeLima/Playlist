@@ -89,18 +89,16 @@ app.MapGet("/BuscarMusica", (string? artista, string? compositor, string? genero
         }
     }
     
-    return Results.Ok(new { musica = filtro });
+    return Results.Ok(new {
+        musica = filtro 
+    });
 });
 
 //Atualizar Musica
 app.Mappatch("/AtualizarMusica/{id}/titulo", (int id, String novoTitulo) =>
 
-
-
 //Deletar Música
-app.MapDelete("DeletarMusica/{titulo}", (String titulo)=>
-(Ao infinito e além das minhas capacidades. Basicamente era para acontecer o seguinte, o usuario digitaria em um dos campos, ao buscar os campos vazios vão ser ignorados e vai focar no que foi preenchido. por isso usamos o IsNullOrEmpty e o HasValue)
-{
+app.MapDelete("DeletarMusica/{titulo}", (String titulo)=>{
     var M = listamusicas.Find(musica => musica.id == id);
      
     if(M == null)
@@ -115,9 +113,10 @@ app.MapDelete("DeletarMusica/{titulo}", (String titulo)=>
 
     return Results.Ok(new
     {
-        mensagem = "Título atualizado com sucesso.",
+        mensagem = "Título atualizado com sucesso."
     });
 });
+
 //Deletar Música
 app.MapDelete("/DeletarMusica/{id}", (int id)=>
 {
@@ -138,5 +137,6 @@ app.MapDelete("/DeletarMusica/{id}", (int id)=>
 		mensagem = "Musica removida com sucesso."
     });
 });
+
 // Inicia o servidor web é iniciado e passa a aguardar requisições HTTP dos clientes
 app.Run();
