@@ -95,8 +95,26 @@ app.MapGet("/BuscarMusica", (string? artista, string? compositor, string? genero
 });
 
 //Atualizar Musica
-app.Mappatch("/AtualizarMusica/{id}/titulo", (int id, String novoTitulo) =>
+app.MapPatch("/AtualizarMusica/{id}/titulo", (int id, string novoTitulo) =>
+{
+    var m = listamusicas.Find(musica => musica.Id == id);
 
+    if (m == null)
+    {
+        return Results.NotFound(new
+        {
+            erro = "Música não encontrada."
+        });
+    }
+
+    m.Titulo = novoTitulo;
+
+    return Results.Ok(new
+    {
+        mensagem = "Título atualizado com sucesso.",
+        musica = m
+    });
+});
 //Deletar Música
 app.MapDelete("DeletarMusica/{titulo}", (String titulo)=>{
     var M = listamusicas.Find(musica => musica.id == id);
