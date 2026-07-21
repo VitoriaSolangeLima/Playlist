@@ -25,6 +25,7 @@ app.UseCors("AllowAll");
 /*Para usar os .Find(), .Add() e .Remove() o array NÃO PODE SER FIXO []. 
 Musica[] listamusicas = new Musicas[100]; 
 int totalmusicas = 0;   APAGAR ISSO DEPOIS*/
+
 //Para usar .Find(), .Add() e .Remove() precisa ser uma lista dinamica .List<Musica>
 List<Musica> listamusicas = new List<Musica>();//List<T> do C# foi feita justamente para lidar com coleções de tamanho variável.
 
@@ -75,7 +76,7 @@ app.MapGet("/BuscarMusica", (string? artista, string? compositor, string? genero
     var filtro = new List<Musica>();
     
     /*for (int i = 0; i < totalmusicas; i++){ MUDEI ISSO
-        var f = listamusicas[i];*/
+        var f = listamusicas[i]; APAGAR ISSO*/
     foreach (var f in listamusicas){ //Laço de repetição para repetir as condiçoes para cada item e guardar na var f
         bool corresponde = true;
 
