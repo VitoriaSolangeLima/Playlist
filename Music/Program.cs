@@ -1,9 +1,8 @@
 using Music.Models;
 using System.Text.Json;
-var builder = WebApplication.CreateBuilder(args);
 
 // Cria um objeto responsável por configurar a aplicação ASP.NET
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(args); //Estava duplicado
 
 // Define o endereço e a porta em que a aplicação irá escutar requisições HTTP
 builder.WebHost.UseUrls("http://localhost:8000");
@@ -23,51 +22,64 @@ var app = builder.Build();
 
 app.UseCors("AllowAll");
 
-Musica[] listamusicas = new Musicas[100];
-int totalmusicas = 0;
+/*Para usar os .Find(), .Add() e .Remove() o array NÃO PODE SER FIXO []. 
+Musica[] listamusicas = new Musicas[100]; 
+int totalmusicas = 0;   APAGAR ISSO DEPOIS*/
+//Para usar .Find(), .Add() e .Remove() precisa ser uma lista dinamica .List<Musica>
+List<Musica> listamusicas = new List<Musica>();//List<T> do C# foi feita justamente para lidar com coleções de tamanho variável.
 
-// Definição de rotas HTTP do tipo POST 
-app.MapPost("/CadastrarMusica", (JasonElement body ) => 
+//Cadastrar musicas (POST)
+app.MapPost("/CadastrarMusica", (JsonElement body ) => //Tava JasonElement e o certo é JsonElement
 {
     Random random = new ();
     Musica musica = new Musica();
 
-    Musica.Id = random.Next(1000, 9999);
-    Musica.Titulo = body.GetProperty("titulo").GetString()?? "";
-    Musica.Compositor = body.GetProperty("compositor").GetString()?? "";
-    Musica.Genero = body.GetProperty("genero").GetString()?? "";
-    Musica.Artista = body.GetProperty("artista").GetString()?? "";
-    Musica.Ano = body.GetProperty("ano").GetInt16()?? "";
+    musica.Id = random.Next(1000, 9999);//Mudei o Musica. para musica.
+    musica.Titulo = body.GetProperty("titulo").GetString()?? "";
+    musica.Compositor = body.GetProperty("compositor").GetString()?? "";
+    musica.Genero = body.GetProperty("genero").GetString()?? "";
+    musica.Artista = body.GetProperty("artista").GetString()?? "";
+    musica.Ano = body.GetProperty("ano").GetInt32(); 
+    //Mudei o GetInt16 para GetInt32 por conta do tamanho que foi imposto na propriedade do ano no Musicas.cs
 
-    listamusicas[totalmusicas] = musica;
-    totalmusicas++;
+    /*MUDEI ISSO listamusicas[totalmusicas] = musica;
+    totalmusicas++; APAGAR DEPOIS*/
+
+    listamusicas.Add(musica); //.Add aumenta a lista e adiciona o item ao final
 
     return Results.Ok(new{musica});
 
 });
 
 
-//Listagem
+//Listagem (GET)
 app.MapGet("/Listar", () => 
 {
+    /*MUDEI ISSO
     Musica[] musicascadastradas = new Musica[totalmusicas];
 
     for(int i =0; i < totalmusicas; i++){
         musicascadastradas[i] = listamusicas[i];
     }
-     return Results.Ok(new{musicascadastradas});
+     return Results.Ok(new{musicascadastradas}); APAGAR DEPOIS PARA ISSO*/
+    
+    //Como a List<Musicas> guarda apenas as musicas salvas não precisa dos laços para não mostrar os null
+    return Results.Ok(new { musicascadastradas = listamusicas }); 
 
 });
 
 
-//Busca 
-app.MapGet("/BuscarMusica", (string? artista, string? compositor, string? genero, int? ano) =>{
-    var filtro = new System.Collections.Generic.List<Funcionario>();
+//Busca com filtros (GET)
+app.MapGet("/BuscarMusica", (string? artista, string? compositor, string? genero, int? ano) =>
+{
+    var filtro = new List<Musica>();
     
-    for (int i = 0; i < totalmusicas; i++){
-        var f = listamusicas[i];
+    /*for (int i = 0; i < totalmusicas; i++){ MUDEI ISSO
+        var f = listamusicas[i];*/
+    foreach (var f in listamusicas){ //Laço de repetição para repetir as condiçoes para cada item e guardar na var f
         bool corresponde = true;
 
+        //Se o item não for igual a busca pula
         if (!string.IsNullOrEmpty(artista) && !f.Artista.Contains(artista, StringComparison.OrdinalIgnoreCase)){
             corresponde = false;
         }
@@ -89,12 +101,10 @@ app.MapGet("/BuscarMusica", (string? artista, string? compositor, string? genero
         }
     }
     
-    return Results.Ok(new {
-        musica = filtro 
-    });
+    return Results.Ok(new {musica = filtro});
 });
 
-//Atualizar Musica
+//Atualizar Musica (PATCH)
 app.MapPatch("/AtualizarMusica/{id}/titulo", (int id, string novoTitulo) =>
 {
     var m = listamusicas.Find(musica => musica.Id == id);
@@ -115,8 +125,10 @@ app.MapPatch("/AtualizarMusica/{id}/titulo", (int id, string novoTitulo) =>
         musica = m
     });
 });
-//Deletar Música
-app.MapDelete("DeletarMusica/{titulo}", (String titulo)=>{
+
+//Deletar Música 
+//TEM DOIS DELETAR ISSO PODE CONFUNDIR QUANDO RODAR POR TER AS MESMAS ROTAS
+/*app.MapDelete("DeletarMusica/{titulo}", (String titulo)=>{ TIREI A POR TITULO PQ O PROFESSOR QUER POR ID
     var M = listamusicas.Find(musica => musica.id == id);
      
     if(M == null)
@@ -133,12 +145,12 @@ app.MapDelete("DeletarMusica/{titulo}", (String titulo)=>{
     {
         mensagem = "Título atualizado com sucesso."
     });
-});
+});*/
 
 //Deletar Música
 app.MapDelete("/DeletarMusica/{id}", (int id)=>
 {
-    var M = listamusicas.Find(musica => musica.id == id);
+    var M = listamusicas.Find(musica => musica.Id == id); // Estava musica.id
 
     if(M == null)
     {

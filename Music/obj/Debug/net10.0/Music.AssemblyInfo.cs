@@ -13,11 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Music")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-<<<<<<< HEAD
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ed0744cfa39fe9ef97b0aab5e551556581756586")]
-=======
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d83fe59e300624441d604ca25651cd73057b471f")]
->>>>>>> 2ea004d (Rota de Atualização)
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cd1e4f2dbc094bb991ef1901c5167227146617fe")]
 [assembly: System.Reflection.AssemblyProductAttribute("Music")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Music")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
