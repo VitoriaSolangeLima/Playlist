@@ -22,10 +22,6 @@ var app = builder.Build();
 
 app.UseCors("AllowAll");
 
-/*Para usar os .Find(), .Add() e .Remove() o array NÃO PODE SER FIXO []. 
-Musica[] listamusicas = new Musicas[100]; 
-int totalmusicas = 0;   APAGAR ISSO DEPOIS*/
-
 //Para usar .Find(), .Add() e .Remove() precisa ser uma lista dinamica .List<Musica>
 List<Musica> listamusicas = new List<Musica>();//List<T> do C# foi feita justamente para lidar com coleções de tamanho variável.
 
@@ -43,9 +39,6 @@ app.MapPost("/CadastrarMusica", (JsonElement body ) => //Tava JasonElement e o c
     musica.Ano = body.GetProperty("ano").GetInt32(); 
     //Mudei o GetInt16 para GetInt32 por conta do tamanho que foi imposto na propriedade do ano no Musicas.cs
 
-    /*MUDEI ISSO listamusicas[totalmusicas] = musica;
-    totalmusicas++; APAGAR DEPOIS*/
-
     listamusicas.Add(musica); //.Add aumenta a lista e adiciona o item ao final
 
     return Results.Ok(new{musica});
@@ -55,15 +48,7 @@ app.MapPost("/CadastrarMusica", (JsonElement body ) => //Tava JasonElement e o c
 
 //Listagem (GET)
 app.MapGet("/Listar", () => 
-{
-    /*MUDEI ISSO
-    Musica[] musicascadastradas = new Musica[totalmusicas];
-
-    for(int i =0; i < totalmusicas; i++){
-        musicascadastradas[i] = listamusicas[i];
-    }
-     return Results.Ok(new{musicascadastradas}); APAGAR DEPOIS PARA ISSO*/
-    
+{    
     //Como a List<Musicas> guarda apenas as musicas salvas não precisa dos laços para não mostrar os null
     return Results.Ok(new { musicascadastradas = listamusicas }); 
 
@@ -75,8 +60,6 @@ app.MapGet("/BuscarMusica", (string? artista, string? compositor, string? genero
 {
     var filtro = new List<Musica>();
     
-    /*for (int i = 0; i < totalmusicas; i++){ MUDEI ISSO
-        var f = listamusicas[i]; APAGAR ISSO*/
     foreach (var f in listamusicas){ //Laço de repetição para repetir as condiçoes para cada item e guardar na var f
         bool corresponde = true;
 
@@ -127,26 +110,7 @@ app.MapPatch("/AtualizarMusica/{id}/titulo", (int id, string novoTitulo) =>
     });
 });
 
-//Deletar Música 
-//TEM DOIS DELETAR ISSO PODE CONFUNDIR QUANDO RODAR POR TER AS MESMAS ROTAS
-/*app.MapDelete("DeletarMusica/{titulo}", (String titulo)=>{ TIREI A POR TITULO PQ O PROFESSOR QUER POR ID
-    var M = listamusicas.Find(musica => musica.id == id);
-     
-    if(M == null)
-    {
-        return Results.NotFound(new
-        {
-			erro = "Musica não encontrada."
-        });
-    }
 
-    M.titulo = novoTitulo;
-
-    return Results.Ok(new
-    {
-        mensagem = "Título atualizado com sucesso."
-    });
-});*/
 
 //Deletar Música
 app.MapDelete("/DeletarMusica/{id}", (int id)=>
