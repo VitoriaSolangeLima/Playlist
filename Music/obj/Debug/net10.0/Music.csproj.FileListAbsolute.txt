@@ -34,3 +34,7 @@
 /workspaces/Playlist/Music/obj/Debug/net10.0/Music.pdb
 /workspaces/Playlist/Music/obj/Debug/net10.0/Music.genruntimeconfig.cache
 /workspaces/Playlist/Music/obj/Debug/net10.0/ref/Music.dll
+<<<<<<< HEAD
+=======
+/workspaces/Playlist/Music/obj/Debug/net10.0/compressed/a7asah507j-{0}-tig58zoedu-tig58zoedu.gz
+>>>>>>> d6c2d73 (Penutima versão, apagar o wwwroot)

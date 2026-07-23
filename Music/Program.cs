@@ -33,18 +33,27 @@ int totalmusicas = 0;
 // Cadastrar Musicas
 app.MapPost("/CadastrarMusica", (JsonElement body) =>
 {
-    Random random = new ();
+    Random random = new();
     Musica musica = new Musica();
 
     musica.Id = random.Next(1000, 9999);
-    musica.Titulo = body.GetProperty("titulo").GetString() ?? "";
-    musica.Compositor = body.GetProperty("compositor").GetString() ?? "";
-    musica.Genero = body.GetProperty("genero").GetString() ?? "";
-    musica.Artista = body.GetProperty("artista").GetString() ?? "";
-    musica.Ano = body.GetProperty("ano").GetInt16();
+
+    if (body.TryGetProperty("titulo", out var pTitulo))
+        musica.Titulo = pTitulo.GetString() ?? "";
+
+    if (body.TryGetProperty("compositor", out var pCompositor))
+        musica.Compositor = pCompositor.GetString() ?? "";
+
+    if (body.TryGetProperty("genero", out var pGenero))
+        musica.Genero = pGenero.GetString() ?? "";
+
+    if (body.TryGetProperty("artista", out var pArtista))
+        musica.Artista = pArtista.GetString() ?? "";
+
+    if (body.TryGetProperty("ano", out var pAno) && pAno.ValueKind == JsonValueKind.Number)
+        musica.Ano = (short)pAno.GetInt32();
 
     listamusicas[totalmusicas] = musica;
-
     totalmusicas++;
 
     return Results.Ok(new { musica });
@@ -55,16 +64,22 @@ app.MapGet("/Listar", () =>
 {
     Musica[] musicascadastradas = new Musica[totalmusicas];
 
-    for (int i = 0; i < totalmusicas; i++)
+//Listagem
+app.MapGet("/Listar", () =>
+{
+    Musica[] musicascadastradas = new Musica[totalmusicas];
+
+    for(int i =0; i < totalmusicas; i++)
     {
         musicascadastradas[i] = listamusicas[i];
     }
-    return Results.Ok(new { musicascadastradas });
+     return Results.Ok(new{musicascadastradas});
+
 });
 
-// Busca
-app.MapGet("/BuscarMusica", (string? artista, string? compositor, string? genero, int? ano) =>
-{
+//Busca
+app.MapGet("/BuscarMusica", (string? artista, string? compositor, string? genero, int? ano) =>{
+
     var filtro = new System.Collections.Generic.List<Musica>();
 
     for (int i = 0; i < totalmusicas; i++)
@@ -131,7 +146,7 @@ app.MapPatch("/AtualizarMusica/{id}/titulo", (int id, JsonElement body) =>
     });
 });
 
-// Deletar Música
+//Deletar Música
 app.MapDelete("/DeletarMusica/{id}", (int id) =>
 {
     int index = -1;
