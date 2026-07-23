@@ -1,13 +1,14 @@
 using Music.Models;
 using System.Text.Json;
 
+var builder = WebApplication.CreateBuilder(args);
 
-// Cria um objeto responsável por configurar a aplicação ASP.NET
-var builder = WebApplication.CreateBuilder(args); //Estava duplicado
-
-// Define o endereço e a porta em que a aplicação irá escutar requisições HTTP
 builder.WebHost.UseUrls("http://localhost:8000");
 
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.PropertyNamingPolicy = null;
+});
 
 builder.Services.AddCors(options =>
 {
@@ -18,11 +19,11 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader();
     });
 });
-// Constrói a aplicação web a partir das configurações definidas no builder
+
 var app = builder.Build();
 
 app.UseCors("AllowAll");
-//Não sei explicar mais isso aqui é pra usar o arquivo html q eu botei no projeto, se não colocar isso ele não vai abrir o arquivo html
+
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
@@ -30,42 +31,40 @@ Musica[] listamusicas = new Musica[100];
 int totalmusicas = 0;
 
 // Cadastrar Musicas
-app.MapPost("/CadastrarMusica", (JsonElement body ) =>
+app.MapPost("/CadastrarMusica", (JsonElement body) =>
 {
     Random random = new ();
     Musica musica = new Musica();
 
     musica.Id = random.Next(1000, 9999);
-    musica.Titulo = body.GetProperty("titulo").GetString()?? "";
-    musica.Compositor = body.GetProperty("compositor").GetString()?? "";
-    musica.Genero = body.GetProperty("genero").GetString()?? "";
-    musica.Artista = body.GetProperty("artista").GetString()?? "";
+    musica.Titulo = body.GetProperty("titulo").GetString() ?? "";
+    musica.Compositor = body.GetProperty("compositor").GetString() ?? "";
+    musica.Genero = body.GetProperty("genero").GetString() ?? "";
+    musica.Artista = body.GetProperty("artista").GetString() ?? "";
     musica.Ano = body.GetProperty("ano").GetInt16();
 
     listamusicas[totalmusicas] = musica;
 
     totalmusicas++;
 
-    return Results.Ok(new{musica});
+    return Results.Ok(new { musica });
 });
 
-
-//Listagem
+// Listagem
 app.MapGet("/Listar", () =>
 {
     Musica[] musicascadastradas = new Musica[totalmusicas];
 
-    for(int i =0; i < totalmusicas; i++)
+    for (int i = 0; i < totalmusicas; i++)
     {
         musicascadastradas[i] = listamusicas[i];
     }
-     return Results.Ok(new{musicascadastradas});
-
+    return Results.Ok(new { musicascadastradas });
 });
 
-//Busca
-app.MapGet("/BuscarMusica", (string? artista, string? compositor, string? genero, int? ano) =>{
-
+// Busca
+app.MapGet("/BuscarMusica", (string? artista, string? compositor, string? genero, int? ano) =>
+{
     var filtro = new System.Collections.Generic.List<Musica>();
 
     for (int i = 0; i < totalmusicas; i++)
@@ -93,56 +92,53 @@ app.MapGet("/BuscarMusica", (string? artista, string? compositor, string? genero
         {
             filtro.Add(f);
         }
-
     }
     return Results.Ok(new {
-
         musica = filtro
-
     });
-
 });
 
-//Atualizar Musica
+// Atualizar Musica
 app.MapPatch("/AtualizarMusica/{id}/titulo", (int id, JsonElement body) =>
 {
     Musica? musica = null;
 
-    //Procurar musica pelo id
-    for(int i = 0; i < totalmusicas; i++)
+    for (int i = 0; i < totalmusicas; i++)
     {
-        if(listamusicas[i].Id == id)
+        if (listamusicas[i].Id == id)
         {
             musica = listamusicas[i];
 
             if (body.TryGetProperty("titulo", out var titulo))
             {
-               musica.Titulo = titulo.GetString();
+               musica.Titulo = titulo.GetString() ?? musica.Titulo;
             }
-               listamusicas[i] = musica;
+            listamusicas[i] = musica;
+            break;
         }
     }
     if (musica == null)
     {
         return Results.NotFound(new 
         { 
-           erro = "Música não encontrada."
+            erro = "Música não encontrada."
         });
     }
 
     return Results.Ok(new 
     { 
-       mensagem = "Título atualizado com sucesso.", musica 
+        mensagem = "Título atualizado com sucesso.", musica 
     });
 });
 
-//Deletar Música
+// Deletar Música
 app.MapDelete("/DeletarMusica/{id}", (int id) =>
 {
     int index = -1;
 
-    for(int i = 0; i < totalmusicas; i++){
-        if(listamusicas[i].Id == id)
+    for (int i = 0; i < totalmusicas; i++)
+    {
+        if (listamusicas[i].Id == id)
         {
             index = i;
             break;
@@ -156,7 +152,6 @@ app.MapDelete("/DeletarMusica/{id}", (int id) =>
         });
     }
 
-    // Remover
     for (int i = index; i < totalmusicas - 1; i++)
     {
         listamusicas[i] = listamusicas[i + 1];
@@ -170,5 +165,4 @@ app.MapDelete("/DeletarMusica/{id}", (int id) =>
     });
 });
 
-// Inicia o servidor web é iniciado e passa a aguardar requisições HTTP dos clientes
 app.Run();
