@@ -1,6 +1,5 @@
 using Music.Models;
 using System.Text.Json;
-var builder = WebApplication.CreateBuilder(args);
 
 // Cria um objeto responsável por configurar a aplicação ASP.NET
 var builder = WebApplication.CreateBuilder(args);
@@ -23,21 +22,21 @@ var app = builder.Build();
 
 app.UseCors("AllowAll");
 
-Musica[] listamusicas = new Musicas[100];
+Musica[] listamusicas = new Musica[100];
 int totalmusicas = 0;
 
-// Definição de rotas HTTP do tipo POST 
-app.MapPost("/CadastrarMusica", (JasonElement body ) => 
+// Cadastrar Musicas
+app.MapPost("/CadastrarMusica", (JsonElement body ) => 
 {
     Random random = new ();
     Musica musica = new Musica();
 
-    Musica.Id = random.Next(1000, 9999);
-    Musica.Titulo = body.GetProperty("titulo").GetString()?? "";
-    Musica.Compositor = body.GetProperty("compositor").GetString()?? "";
-    Musica.Genero = body.GetProperty("genero").GetString()?? "";
-    Musica.Artista = body.GetProperty("artista").GetString()?? "";
-    Musica.Ano = body.GetProperty("ano").GetInt16()?? "";
+    musica.id = random.Next(1000, 9999);
+    musica.Titulo = body.GetProperty("titulo").GetString()?? "";
+    musica.Compositor = body.GetProperty("compositor").GetString()?? "";
+    musica.Genero = body.GetProperty("genero").GetString()?? "";
+    musica.Artista = body.GetProperty("artista").GetString()?? "";
+    musica.Ano = body.GetProperty("ano").GetInt16();
 
     listamusicas[totalmusicas] = musica;
     totalmusicas++;
@@ -62,7 +61,7 @@ app.MapGet("/Listar", () =>
 
 //Busca 
 app.MapGet("/BuscarMusica", (string? artista, string? compositor, string? genero, int? ano) =>{
-    var filtro = new System.Collections.Generic.List<Funcionario>();
+    var filtro = new System.Collections.Generic.List<Musica>();
     
     for (int i = 0; i < totalmusicas; i++){
         var f = listamusicas[i];
@@ -95,64 +94,69 @@ app.MapGet("/BuscarMusica", (string? artista, string? compositor, string? genero
 });
 
 //Atualizar Musica
-app.MapPatch("/AtualizarMusica/{id}/titulo", (int id, string novoTitulo) =>
+app.MapPatch("/AtualizarMusica/{id}/titulo", (int id, JsonElement body) =>
 {
-    var m = listamusicas.Find(musica => musica.Id == id);
+    Musica? musica = null;
 
-    if (m == null)
+    //Procurar musica pelo id
+    for(int i = 0; i < totalmusicas; i++)
     {
-        return Results.NotFound(new
+        if(listamusicas[i].id == id)
         {
-            erro = "Música não encontrada."
+            musica = listamusicas[i];
+
+            if (body.TryGetProperty("titulo", out var titulo))
+            {
+               musica.Titulo = titulo.GetString();
+            }
+               listamusicas[i] = musica;
+        }
+    }
+    if (musica == null)
+    {
+        return Results.NotFound(new 
+        { 
+           erro = "Música não encontrada."
         });
     }
 
-    m.Titulo = novoTitulo;
-
-    return Results.Ok(new
-    {
-        mensagem = "Título atualizado com sucesso.",
-        musica = m
-    });
-});
-//Deletar Música
-app.MapDelete("DeletarMusica/{titulo}", (String titulo)=>{
-    var M = listamusicas.Find(musica => musica.id == id);
-     
-    if(M == null)
-    {
-        return Results.NotFound(new
-        {
-			erro = "Musica não encontrada."
-        });
-    }
-
-    M.titulo = novoTitulo;
-
-    return Results.Ok(new
-    {
-        mensagem = "Título atualizado com sucesso."
+    return Results.Ok(new 
+    { 
+       mensagem = "Título atualizado com sucesso.", musica 
     });
 });
 
 //Deletar Música
-app.MapDelete("/DeletarMusica/{id}", (int id)=>
+app.MapDelete("/DeletarMusica/{id}", (int id) =>
 {
-    var M = listamusicas.Find(musica => musica.id == id);
+    int index = -1;
 
-    if(M == null)
+    for(int i = 0; i < totalmusicas; i++){
+        if(listamusicas[i].id == id)
+        {
+            index = i;
+            break;
+        }
+    }
+    if (index == -1)
     {
         return Results.NotFound(new
         {
-			erro = "Musica não encontrada."
+            erro = "Musica não encontrada."
         });
     }
 
-    listamusicas.Remove(M);
+    // Remover
+    for (int i = index; i < totalmusicas - 1; i++)
+    {
+        listamusicas[i] = listamusicas[i + 1];
+    }
+
+    totalmusicas--;
 
     return Results.Ok(new
     {
-		mensagem = "Musica removida com sucesso."
+        mensagem = "Musica removida com sucesso."
     });
 });
 
