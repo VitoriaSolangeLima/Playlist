@@ -1,6 +1,7 @@
 using Music.Models;
 using System.Text.Json;
 
+
 // Cria um objeto responsável por configurar a aplicação ASP.NET
 var builder = WebApplication.CreateBuilder(args); //Estava duplicado
 
@@ -21,6 +22,9 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 app.UseCors("AllowAll");
+//Não sei explicar mais isso aqui é pra usar o arquivo html q eu botei no projeto, se não colocar isso ele não vai abrir o arquivo html
+app.UseDefaultFiles();
+app.UseStaticFiles();
 
 //Para usar .Find(), .Add() e .Remove() precisa ser uma lista dinamica .List<Musica>
 List<Musica> listamusicas = new List<Musica>();//List<T> do C# foi feita justamente para lidar com coleções de tamanho variável.
@@ -31,18 +35,16 @@ app.MapPost("/CadastrarMusica", (JsonElement body ) => //Tava JasonElement e o c
     Random random = new ();
     Musica musica = new Musica();
 
-    musica.Id = random.Next(1000, 9999);//Mudei o Musica. para musica.
+    musica.Id = random.Next(1000, 9999);
     musica.Titulo = body.GetProperty("titulo").GetString()?? "";
     musica.Compositor = body.GetProperty("compositor").GetString()?? "";
     musica.Genero = body.GetProperty("genero").GetString()?? "";
     musica.Artista = body.GetProperty("artista").GetString()?? "";
-    musica.Ano = body.GetProperty("ano").GetInt32(); 
-    //Mudei o GetInt16 para GetInt32 por conta do tamanho que foi imposto na propriedade do ano no Musicas.cs
+    musica.Ano = body.GetProperty("ano").GetInt16();
 
     listamusicas.Add(musica); //.Add aumenta a lista e adiciona o item ao final
 
     return Results.Ok(new{musica});
-
 });
 
 
@@ -54,6 +56,8 @@ app.MapGet("/Listar", () =>
 
 });
 
+//Busca
+app.MapGet("/BuscarMusica", (string? artista, string? compositor, string? genero, int? ano) =>{
 
 //Busca com filtros (GET)
 app.MapGet("/BuscarMusica", (string? artista, string? compositor, string? genero, int? ano) =>
@@ -63,73 +67,102 @@ app.MapGet("/BuscarMusica", (string? artista, string? compositor, string? genero
     foreach (var f in listamusicas){ //Laço de repetição para repetir as condiçoes para cada item e guardar na var f
         bool corresponde = true;
 
-        //Se o item não for igual a busca pula
-        if (!string.IsNullOrEmpty(artista) && !f.Artista.Contains(artista, StringComparison.OrdinalIgnoreCase)){
+        if (!string.IsNullOrEmpty(artista) && !f.Artista.Contains(artista, StringComparison.OrdinalIgnoreCase))
+        {
             corresponde = false;
         }
-
-        if (!string.IsNullOrEmpty(compositor) && !f.Compositor.Contains(compositor, StringComparison.OrdinalIgnoreCase)){
+        if (!string.IsNullOrEmpty(compositor) && !f.Compositor.Contains(compositor, StringComparison.OrdinalIgnoreCase))
+        {
             corresponde = false;
         }
-
-        if (!string.IsNullOrEmpty(genero) && !f.Genero.Contains(genero, StringComparison.OrdinalIgnoreCase)){
+        if (!string.IsNullOrEmpty(genero) && !f.Genero.Contains(genero, StringComparison.OrdinalIgnoreCase))
+        {
             corresponde = false;
         }
-
-        if (ano.HasValue && f.Ano != ano.Value){
+        if (ano.HasValue && f.Ano != ano.Value)
+        {
             corresponde = false;
         }
-
-        if (corresponde){
+        if (corresponde)
+        {
             filtro.Add(f);
         }
+
     }
-    
-    return Results.Ok(new {musica = filtro});
+    return Results.Ok(new {
+
+        musica = filtro
+
+    });
+
 });
 
-//Atualizar Musica (PATCH)
-app.MapPatch("/AtualizarMusica/{id}/titulo", (int id, string novoTitulo) =>
+//Atualizar Musica
+app.MapPatch("/AtualizarMusica/{id}/titulo", (int id, JsonElement body) =>
 {
-    var m = listamusicas.Find(musica => musica.Id == id);
+    Musica? musica = null;
 
-    if (m == null)
+    //Procurar musica pelo id
+    for(int i = 0; i < totalmusicas; i++)
     {
-        return Results.NotFound(new
+        if(listamusicas[i].Id == id)
         {
-            erro = "Música não encontrada."
+            musica = listamusicas[i];
+
+            if (body.TryGetProperty("titulo", out var titulo))
+            {
+               musica.Titulo = titulo.GetString();
+            }
+               listamusicas[i] = musica;
+        }
+    }
+    if (musica == null)
+    {
+        return Results.NotFound(new 
+        { 
+           erro = "Música não encontrada."
         });
     }
 
-    m.Titulo = novoTitulo;
-
-    return Results.Ok(new
-    {
-        mensagem = "Título atualizado com sucesso.",
-        musica = m
+    return Results.Ok(new 
+    { 
+       mensagem = "Título atualizado com sucesso.", musica 
     });
 });
 
 
 
 //Deletar Música
-app.MapDelete("/DeletarMusica/{id}", (int id)=>
+app.MapDelete("/DeletarMusica/{id}", (int id) =>
 {
-    var M = listamusicas.Find(musica => musica.Id == id); // Estava musica.id
+    int index = -1;
 
-    if(M == null)
+    for(int i = 0; i < totalmusicas; i++){
+        if(listamusicas[i].Id == id)
+        {
+            index = i;
+            break;
+        }
+    }
+    if (index == -1)
     {
         return Results.NotFound(new
         {
-			erro = "Musica não encontrada."
+            erro = "Musica não encontrada."
         });
     }
 
-    listamusicas.Remove(M);
+    // Remover
+    for (int i = index; i < totalmusicas - 1; i++)
+    {
+        listamusicas[i] = listamusicas[i + 1];
+    }
+
+    totalmusicas--;
 
     return Results.Ok(new
     {
-		mensagem = "Musica removida com sucesso."
+        mensagem = "Musica removida com sucesso."
     });
 });
 
