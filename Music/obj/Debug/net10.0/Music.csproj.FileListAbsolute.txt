@@ -32,3 +32,5 @@
 /workspaces/Playlist/Music/obj/Debug/net10.0/Music.pdb
 /workspaces/Playlist/Music/obj/Debug/net10.0/Music.genruntimeconfig.cache
 /workspaces/Playlist/Music/obj/Debug/net10.0/ref/Music.dll
+/workspaces/Playlist/Music/bin/Debug/net10.0/Music.staticwebassets.runtime.json
+/workspaces/Playlist/Music/obj/Debug/net10.0/compressed/a7asah507j-{0}-d1kwwj5347-d1kwwj5347.gz

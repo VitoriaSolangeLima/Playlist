@@ -1,6 +1,7 @@
 using Music.Models;
 using System.Text.Json;
 
+
 // Cria um objeto responsável por configurar a aplicação ASP.NET
 var builder = WebApplication.CreateBuilder(args); //Estava duplicado
 
@@ -21,79 +22,85 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 app.UseCors("AllowAll");
+//Não sei explicar mais isso aqui é pra usar o arquivo html q eu botei no projeto, se não colocar isso ele não vai abrir o arquivo html
+app.UseDefaultFiles();
+app.UseStaticFiles();
 
 Musica[] listamusicas = new Musica[100];
 int totalmusicas = 0;
 
 // Cadastrar Musicas
-app.MapPost("/CadastrarMusica", (JsonElement body ) => 
+app.MapPost("/CadastrarMusica", (JsonElement body ) =>
 {
     Random random = new ();
     Musica musica = new Musica();
 
-    musica.id = random.Next(1000, 9999);
+    musica.Id = random.Next(1000, 9999);
     musica.Titulo = body.GetProperty("titulo").GetString()?? "";
     musica.Compositor = body.GetProperty("compositor").GetString()?? "";
     musica.Genero = body.GetProperty("genero").GetString()?? "";
     musica.Artista = body.GetProperty("artista").GetString()?? "";
     musica.Ano = body.GetProperty("ano").GetInt16();
 
-    /*MUDEI ISSO listamusicas[totalmusicas] = musica;
-    totalmusicas++; APAGAR DEPOIS*/
+    listamusicas[totalmusicas] = musica;
 
-    listamusicas.Add(musica); //.Add aumenta a lista e adiciona o item ao final
+    totalmusicas++;
 
     return Results.Ok(new{musica});
-
 });
 
 
-//Listagem (GET)
-app.MapGet("/Listar", () => 
+//Listagem
+app.MapGet("/Listar", () =>
 {
-    /*MUDEI ISSO
     Musica[] musicascadastradas = new Musica[totalmusicas];
 
-    for(int i =0; i < totalmusicas; i++){
+    for(int i =0; i < totalmusicas; i++)
+    {
         musicascadastradas[i] = listamusicas[i];
     }
      return Results.Ok(new{musicascadastradas});
 
 });
 
-
-//Busca 
+//Busca
 app.MapGet("/BuscarMusica", (string? artista, string? compositor, string? genero, int? ano) =>{
+
     var filtro = new System.Collections.Generic.List<Musica>();
-    
-    /*for (int i = 0; i < totalmusicas; i++){ MUDEI ISSO
-        var f = listamusicas[i]; APAGAR ISSO*/
-    foreach (var f in listamusicas){ //Laço de repetição para repetir as condiçoes para cada item e guardar na var f
+
+    for (int i = 0; i < totalmusicas; i++)
+    {
+        var f = listamusicas[i];
         bool corresponde = true;
 
-        //Se o item não for igual a busca pula
-        if (!string.IsNullOrEmpty(artista) && !f.Artista.Contains(artista, StringComparison.OrdinalIgnoreCase)){
+        if (!string.IsNullOrEmpty(artista) && !f.Artista.Contains(artista, StringComparison.OrdinalIgnoreCase))
+        {
             corresponde = false;
         }
-
-        if (!string.IsNullOrEmpty(compositor) && !f.Compositor.Contains(compositor, StringComparison.OrdinalIgnoreCase)){
+        if (!string.IsNullOrEmpty(compositor) && !f.Compositor.Contains(compositor, StringComparison.OrdinalIgnoreCase))
+        {
             corresponde = false;
         }
-
-        if (!string.IsNullOrEmpty(genero) && !f.Genero.Contains(genero, StringComparison.OrdinalIgnoreCase)){
+        if (!string.IsNullOrEmpty(genero) && !f.Genero.Contains(genero, StringComparison.OrdinalIgnoreCase))
+        {
             corresponde = false;
         }
-
-        if (ano.HasValue && f.Ano != ano.Value){
+        if (ano.HasValue && f.Ano != ano.Value)
+        {
             corresponde = false;
         }
-
-        if (corresponde){
+        if (corresponde)
+        {
             filtro.Add(f);
         }
+
     }
-    
-    return Results.Ok(new {musica = filtro});
+    return Results.Ok(new {
+
+        musica = filtro
+
+    });
+
 });
 
 //Atualizar Musica
@@ -104,7 +111,7 @@ app.MapPatch("/AtualizarMusica/{id}/titulo", (int id, JsonElement body) =>
     //Procurar musica pelo id
     for(int i = 0; i < totalmusicas; i++)
     {
-        if(listamusicas[i].id == id)
+        if(listamusicas[i].Id == id)
         {
             musica = listamusicas[i];
 
@@ -135,7 +142,7 @@ app.MapDelete("/DeletarMusica/{id}", (int id) =>
     int index = -1;
 
     for(int i = 0; i < totalmusicas; i++){
-        if(listamusicas[i].id == id)
+        if(listamusicas[i].Id == id)
         {
             index = i;
             break;
