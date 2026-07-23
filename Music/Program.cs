@@ -2,7 +2,7 @@ using Music.Models;
 using System.Text.Json;
 
 // Cria um objeto responsável por configurar a aplicação ASP.NET
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(args); //Estava duplicado
 
 // Define o endereço e a porta em que a aplicação irá escutar requisições HTTP
 builder.WebHost.UseUrls("http://localhost:8000");
@@ -38,17 +38,20 @@ app.MapPost("/CadastrarMusica", (JsonElement body ) =>
     musica.Artista = body.GetProperty("artista").GetString()?? "";
     musica.Ano = body.GetProperty("ano").GetInt16();
 
-    listamusicas[totalmusicas] = musica;
-    totalmusicas++;
+    /*MUDEI ISSO listamusicas[totalmusicas] = musica;
+    totalmusicas++; APAGAR DEPOIS*/
+
+    listamusicas.Add(musica); //.Add aumenta a lista e adiciona o item ao final
 
     return Results.Ok(new{musica});
 
 });
 
 
-//Listagem
+//Listagem (GET)
 app.MapGet("/Listar", () => 
 {
+    /*MUDEI ISSO
     Musica[] musicascadastradas = new Musica[totalmusicas];
 
     for(int i =0; i < totalmusicas; i++){
@@ -63,10 +66,12 @@ app.MapGet("/Listar", () =>
 app.MapGet("/BuscarMusica", (string? artista, string? compositor, string? genero, int? ano) =>{
     var filtro = new System.Collections.Generic.List<Musica>();
     
-    for (int i = 0; i < totalmusicas; i++){
-        var f = listamusicas[i];
+    /*for (int i = 0; i < totalmusicas; i++){ MUDEI ISSO
+        var f = listamusicas[i]; APAGAR ISSO*/
+    foreach (var f in listamusicas){ //Laço de repetição para repetir as condiçoes para cada item e guardar na var f
         bool corresponde = true;
 
+        //Se o item não for igual a busca pula
         if (!string.IsNullOrEmpty(artista) && !f.Artista.Contains(artista, StringComparison.OrdinalIgnoreCase)){
             corresponde = false;
         }
@@ -88,9 +93,7 @@ app.MapGet("/BuscarMusica", (string? artista, string? compositor, string? genero
         }
     }
     
-    return Results.Ok(new {
-        musica = filtro 
-    });
+    return Results.Ok(new {musica = filtro});
 });
 
 //Atualizar Musica
