@@ -1,595 +1,720 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Arquivo Sonoro - Acervo Musical</title>
-  <style>
-    :root {
-      --bg-color: #f4ecd8;
-      --card-bg: #fffbf0;
-      --text-color: #2c251e;
-      --accent: #5c3a21;
-      --accent-hover: #3d2514;
-      --border-color: #c8b99d;
-      --danger: #962d22;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arquivo Sonoro — Catálogo de Músicas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Special+Elite&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#2b1d14;
+    --bg-deep-2:#221610;
+    --paper:#f2e6c9;
+    --paper-dark:#e6d3a4;
+    --ink:#3c2a1e;
+    --ink-soft:#5c4531;
+    --brass:#b8935a;
+    --brass-light:#d4b483;
+    --oxblood:#8c3a2b;
+    --oxblood-dark:#6e2c20;
+    --forest:#4a5d43;
+    --shadow: rgba(0,0,0,.45);
+  }
 
-    body {
-      font-family: "Courier New", Courier, monospace;
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      margin: 0;
-      padding: 25px;
-    }
+  *{ box-sizing:border-box; }
 
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-    }
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse at top, #3a281c 0%, var(--bg-deep) 55%, var(--bg-deep-2) 100%);
+    color:var(--ink);
+    font-family:'Special Elite', monospace;
+    padding:2.5rem 1.25rem 5rem;
+  }
 
-    header {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      border-bottom: 2px dashed var(--border-color);
-      padding-bottom: 15px;
-      margin-bottom: 25px;
-    }
+  /* faint paper grain / wood grain feel */
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(0,0,0,0.08) 0px, rgba(0,0,0,0.08) 1px, transparent 1px, transparent 3px);
+    pointer-events:none;
+    opacity:.25;
+  }
 
-    #vinyl {
-      width: 50px;
-      height: 50px;
-      border: 5px solid #2c251e;
-      border-radius: 50%;
-      background: radial-gradient(circle, #fffbf0 10px, #2c251e 11px, #2c251e 15px, #1a1512 16px);
-      display: inline-block;
-    }
+  .wrap{ max-width:900px; margin:0 auto; position:relative; z-index:1; }
 
-    #vinyl.spinning {
-      animation: spin 2s linear infinite;
-    }
+  /* ---------- HEADER / SIGNATURE ELEMENT ---------- */
+  header{
+    display:flex;
+    align-items:center;
+    gap:1.75rem;
+    margin-bottom:2.75rem;
+    flex-wrap:wrap;
+  }
 
-    @keyframes spin {
-      100% { transform: rotate(360deg); }
-    }
+  .vinyl{
+    width:96px; height:96px; flex-shrink:0;
+    position:relative;
+  }
+  .vinyl svg{ width:100%; height:100%; display:block; }
+  .vinyl-disc{
+    transform-origin:48px 48px;
+    animation: spin 3.2s linear infinite;
+    animation-play-state: paused;
+  }
+  .vinyl.spinning .vinyl-disc{ animation-play-state: running; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
 
-    h1 {
-      margin: 0;
-      font-size: 1.8rem;
-      letter-spacing: -1px;
-    }
+  .tonearm{
+    position:absolute; top:-6px; right:-10px;
+    width:44px; height:44px;
+    transform-origin: 38px 6px;
+    transition: transform .5s ease;
+  }
+  .vinyl.spinning .tonearm{ transform: rotate(18deg); }
 
-    .panel {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-left: 4px solid var(--accent);
-      padding: 20px;
-      margin-bottom: 20px;
-      border-radius: 2px;
-      box-shadow: 3px 3px 10px rgba(0,0,0,0.03);
-    }
+  .title-block h1{
+    font-family:'Abril Fatface', serif;
+    font-size:2.6rem;
+    color:var(--paper);
+    margin:0 0 .15rem;
+    letter-spacing:.02em;
+    text-shadow: 2px 2px 0 var(--shadow);
+  }
+  .title-block p{
+    margin:0;
+    color:var(--brass-light);
+    font-size:.95rem;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+  }
 
-    h2 {
-      margin-top: 0;
-      font-size: 1.2rem;
-      border-bottom: 1px dashed var(--border-color);
-      padding-bottom: 8px;
-    }
+  /* ---------- API CONFIG STRIP ---------- */
+  .config{
+    background:var(--bg-deep-2);
+    border:1px solid var(--brass);
+    border-radius:4px;
+    padding:.85rem 1.1rem;
+    display:flex;
+    align-items:center;
+    gap:.75rem;
+    margin-bottom:2.5rem;
+    flex-wrap:wrap;
+  }
+  .config label{
+    color:var(--brass-light);
+    font-size:.8rem;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+  }
+  .config input{
+    flex:1;
+    min-width:220px;
+    background:var(--paper);
+    border:1px solid var(--brass);
+    color:var(--ink);
+    padding:.4rem .6rem;
+    font-family:'Courier Prime', monospace;
+    font-size:.9rem;
+    border-radius:2px;
+  }
+  .config .status-text{
+    font-family:'Courier Prime', monospace;
+    font-size:.8rem;
+    color:var(--brass-light);
+  }
 
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 12px;
-      margin-bottom: 15px;
-    }
+  /* ---------- RIBBON SECTION LABELS ---------- */
+  .ribbon{
+    display:inline-block;
+    background:var(--oxblood);
+    color:var(--paper);
+    font-family:'Abril Fatface', serif;
+    font-size:1.15rem;
+    padding:.4rem 1.1rem .45rem;
+    border-radius:2px 2px 0 0;
+    box-shadow: 0 3px 0 var(--oxblood-dark);
+    margin-bottom:-1px;
+    position:relative;
+  }
+  .ribbon::after{
+    content:"";
+    position:absolute; left:0; bottom:-9px;
+    border-left:9px solid transparent;
+    border-top:9px solid var(--oxblood-dark);
+  }
 
-    .form-group {
-      display: flex;
-      flex-direction: column;
-    }
+  section.card{
+    background:var(--paper);
+    border:1px solid var(--brass);
+    border-radius:0 6px 6px 6px;
+    padding:1.6rem 1.5rem 1.75rem;
+    margin-bottom:2.75rem;
+    box-shadow: 0 8px 22px var(--shadow);
+    position:relative;
+  }
 
-    label {
-      font-size: 0.85rem;
-      font-weight: bold;
-      margin-bottom: 4px;
-    }
+  /* brass paper-fastener pin */
+  section.card::before{
+    content:"";
+    position:absolute; top:-10px; left:1.4rem;
+    width:16px; height:16px;
+    background: radial-gradient(circle at 35% 35%, var(--brass-light), var(--brass) 70%, #7d5f38 100%);
+    border-radius:50%;
+    box-shadow: 0 2px 3px var(--shadow);
+  }
 
-    input {
-      padding: 8px;
-      font-family: inherit;
-      border: 1px solid var(--border-color);
-      background: #fff;
-      border-radius: 2px;
-    }
+  .field-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(160px, 1fr));
+    gap:1rem 1.2rem;
+    margin-bottom:1.2rem;
+  }
+  .field{ display:flex; flex-direction:column; gap:.3rem; }
+  .field label{
+    font-size:.72rem;
+    text-transform:uppercase;
+    letter-spacing:.09em;
+    color:var(--ink-soft);
+  }
+  .field input{
+    background:#fffdf6;
+    border:none;
+    border-bottom:2px solid var(--brass);
+    padding:.4rem .2rem;
+    font-family:'Courier Prime', monospace;
+    font-size:.95rem;
+    color:var(--ink);
+  }
+  .field input:focus{
+    outline:none;
+    border-bottom-color:var(--oxblood);
+    background:#fff;
+  }
 
-    .btn-row {
-      display: flex;
-      gap: 10px;
-    }
+  .btn-row{ display:flex; gap:.8rem; flex-wrap:wrap; align-items:center; }
 
-    button {
-      background-color: var(--accent);
-      color: white;
-      border: none;
-      padding: 8px 15px;
-      font-family: inherit;
-      font-weight: bold;
-      cursor: pointer;
-      border-radius: 2px;
-    }
+  button{
+    font-family:'Special Elite', monospace;
+    font-size:.85rem;
+    letter-spacing:.03em;
+    padding:.65rem 1.3rem;
+    border-radius:3px;
+    border:1px solid var(--ink);
+    background:var(--ink);
+    color:var(--paper);
+    cursor:pointer;
+    transition: transform .12s ease, box-shadow .12s ease;
+  }
+  button:hover{ transform:translateY(-1px); box-shadow:0 4px 10px var(--shadow); }
+  button:active{ transform:translateY(0); }
+  button:focus-visible{ outline:3px solid var(--oxblood); outline-offset:2px; }
 
-    button:hover {
-      background-color: var(--accent-hover);
-    }
+  button.primary{ background:var(--oxblood); border-color:var(--oxblood-dark); }
+  button.ghost{ background:transparent; color:var(--ink); }
+  button.danger{ background:var(--oxblood-dark); border-color:#4d1e16; }
+  button.small{ padding:.35rem .7rem; font-size:.75rem; }
+  button[disabled]{ opacity:.5; cursor:not-allowed; transform:none; box-shadow:none; }
 
-    button.secondary {
-      background-color: #8c7b6c;
-    }
+  .msg{
+    margin-top:1rem;
+    font-family:'Courier Prime', monospace;
+    font-size:.82rem;
+    padding:.6rem .8rem;
+    border-radius:3px;
+    display:none;
+  }
+  .msg.show{ display:block; }
+  .msg.ok{ background:#e4ead9; color:var(--forest); border:1px solid var(--forest); }
+  .msg.err{ background:#f3ddd8; color:var(--oxblood-dark); border:1px solid var(--oxblood); }
 
-    button.secondary:hover {
-      background-color: #6d5e51;
-    }
+  /* ---------- CATALOG CARDS (results) ---------- */
+  .catalog-toolbar{
+    display:flex; justify-content:space-between; align-items:center;
+    gap:1rem; flex-wrap:wrap; margin-bottom:1rem;
+  }
+  .catalog-toolbar .count{
+    font-family:'Courier Prime', monospace;
+    font-size:.8rem;
+    color:var(--ink-soft);
+  }
 
-    button.danger {
-      background-color: var(--danger);
-    }
+  .catalog-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(240px, 1fr));
+    gap:1rem;
+  }
 
-    button.danger:hover {
-      background-color: #701f18;
-    }
+  .disc-card{
+    background:#fffdf6;
+    border:1px dashed var(--brass);
+    border-radius:4px;
+    padding:1rem 1rem 1.1rem;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    gap:.4rem;
+  }
+  .disc-card .badge-id{
+    position:absolute; top:.6rem; right:.7rem;
+    font-family:'Courier Prime', monospace;
+    font-size:.68rem;
+    color:var(--brass);
+  }
+  .disc-card h3{
+    font-family:'Abril Fatface', serif;
+    font-size:1.15rem;
+    margin:.1rem 2rem .1rem 0;
+    color:var(--ink);
+    line-height:1.2;
+  }
+  .disc-card .sub{
+    font-size:.78rem;
+    color:var(--ink-soft);
+    line-height:1.5;
+  }
+  .disc-card .sub strong{ color:var(--ink); }
+  .disc-card .edit-row{
+    display:flex; gap:.4rem; margin-top:.5rem;
+  }
+  .disc-card .edit-row input{
+    flex:1;
+    font-family:'Courier Prime', monospace;
+    font-size:.8rem;
+    border:1px solid var(--brass);
+    border-radius:2px;
+    padding:.3rem .4rem;
+    background:var(--paper);
+  }
+  .disc-card .actions{
+    display:flex; gap:.5rem; margin-top:.3rem;
+  }
 
-    .msg {
-      margin-top: 10px;
-      padding: 8px;
-      font-size: 0.9rem;
-      display: none;
-      border-radius: 2px;
-    }
+  .empty-note{
+    font-family:'Courier Prime', monospace;
+    font-size:.85rem;
+    color:var(--ink-soft);
+    padding:1.2rem;
+    text-align:center;
+    border:1px dashed var(--brass);
+    border-radius:4px;
+  }
 
-    .msg.show {
-      display: block;
-    }
+  @media (prefers-reduced-motion: reduce){
+    .vinyl-disc, .tonearm{ animation:none !important; transition:none !important; }
+  }
 
-    .msg.ok {
-      background: #e1edd8;
-      color: #274e13;
-      border: 1px solid #c8e0b4;
-    }
-
-    .msg.err {
-      background: #fadbd8;
-      color: #78281f;
-      border: 1px solid #f5b7b1;
-    }
-
-    .grid-cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 15px;
-      margin-top: 15px;
-    }
-
-    /* Estilo exato da ficha do acervo inspirada na referência */
-    .disc-card {
-      background: var(--card-bg);
-      border: 1px dashed var(--border-color);
-      padding: 18px;
-      border-radius: 2px;
-      position: relative;
-    }
-
-    .badge-id {
-      position: absolute;
-      top: 15px;
-      right: 15px;
-      font-size: 0.85rem;
-      color: #8c7b6c;
-      font-weight: bold;
-    }
-
-    .disc-card h3 {
-      margin: 0 0 12px 0;
-      font-size: 1.25rem;
-      padding-right: 45px;
-      font-weight: bold;
-    }
-
-    .disc-card .sub {
-      font-size: 0.9rem;
-      line-height: 1.5;
-      margin-bottom: 12px;
-    }
-
-    .edit-row {
-      margin-bottom: 8px;
-    }
-
-    .edit-row input {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 6px;
-      font-size: 0.85rem;
-    }
-
-    .actions {
-      display: flex;
-      gap: 5px;
-    }
-
-    .small {
-      padding: 5px 10px;
-      font-size: 0.75rem;
-    }
-
-    .empty-note {
-      font-style: italic;
-      color: #8c7b6c;
-      grid-column: 1 / -1;
-    }
-  </style>
+  footer{
+    text-align:center;
+    color:var(--brass-light);
+    font-size:.72rem;
+    letter-spacing:.06em;
+    margin-top:1rem;
+    text-transform:uppercase;
+  }
+</style>
 </head>
 <body>
+<div class="wrap">
 
-  <div class="container">
-    <header>
-      <div id="vinyl"></div>
-      <div>
-        <h1>Arquivo Sonoro</h1>
-        <small>Sistema de Gestão de Acervo Musical</small>
-      </div>
-    </header>
+  <header>
+    <div class="vinyl" id="vinyl">
+      <svg viewBox="0 0 96 96">
+        <g class="vinyl-disc">
+          <circle cx="48" cy="48" r="46" fill="#151515"/>
+          <circle cx="48" cy="48" r="46" fill="none" stroke="#333" stroke-width="1"/>
+          <circle cx="48" cy="48" r="38" fill="none" stroke="#2a2a2a" stroke-width="1"/>
+          <circle cx="48" cy="48" r="30" fill="none" stroke="#2a2a2a" stroke-width="1"/>
+          <circle cx="48" cy="48" r="22" fill="none" stroke="#2a2a2a" stroke-width="1"/>
+          <circle cx="48" cy="48" r="15" fill="#b8935a"/>
+          <circle cx="48" cy="48" r="3.2" fill="#2b1d14"/>
+        </g>
+        <g class="tonearm">
+          <line x1="38" y1="6" x2="10" y2="34" stroke="#b8935a" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="38" cy="6" r="5" fill="#b8935a"/>
+          <circle cx="10" cy="34" r="3" fill="#8c3a2b"/>
+        </g>
+      </svg>
+    </div>
+    <div class="title-block">
+      <h1>Arquivo Sonoro</h1>
+      <p>Catálogo do acervo &middot; fichário de músicas</p>
+    </div>
+  </header>
 
-    <!-- PAINEL DE CADASTRO -->
-    <div class="panel">
-      <h2>Nova Ficha de Cadastro</h2>
-      <div class="form-grid">
-        <div class="form-group">
-          <label>Título</label>
+  <!-- CADASTRAR -->
+  <div>
+    <span class="ribbon">Ficha de Cadastro</span>
+    <section class="card">
+      <div class="field-grid">
+        <div class="field">
+          <label for="c-titulo">Título</label>
           <input type="text" id="c-titulo" placeholder="Ex: Águas de Março">
         </div>
-        <div class="form-group">
-          <label>Artista</label>
-          <input type="text" id="c-artista" placeholder="Ex: Elis Regina">
-        </div>
-        <div class="form-group">
-          <label>Compositor</label>
+        <div class="field">
+          <label for="c-compositor">Compositor</label>
           <input type="text" id="c-compositor" placeholder="Ex: Tom Jobim">
         </div>
-        <div class="form-group">
-          <label>Gênero</label>
+        <div class="field">
+          <label for="c-artista">Artista</label>
+          <input type="text" id="c-artista" placeholder="Ex: Elis Regina">
+        </div>
+        <div class="field">
+          <label for="c-genero">Gênero</label>
           <input type="text" id="c-genero" placeholder="Ex: MPB">
         </div>
-        <div class="form-group">
-          <label>Ano</label>
+        <div class="field">
+          <label for="c-ano">Ano</label>
           <input type="number" id="c-ano" placeholder="Ex: 1972">
         </div>
       </div>
       <div class="btn-row">
-        <button id="btnCadastrar">Arquivar Música</button>
-        <button id="btnLimparCadastro" class="secondary">Limpar</button>
+        <button class="primary" id="btnCadastrar">Arquivar música</button>
+        <button class="ghost" id="btnLimparCadastro" type="button">Limpar ficha</button>
       </div>
-      <div id="msgCadastrar" class="msg"></div>
-    </div>
+      <div class="msg" id="msgCadastrar"></div>
+    </section>
+  </div>
 
-    <!-- PAINEL DE BUSCA -->
-    <div class="panel">
-      <h2>Consultar Acervo por Filtros</h2>
-      <div class="form-grid">
-        <div class="form-group">
-          <label>Artista</label>
-          <input type="text" id="b-artista">
+  <!-- BUSCAR -->
+  <div>
+    <span class="ribbon">Consulta ao Acervo</span>
+    <section class="card">
+      <div class="field-grid">
+        <div class="field">
+          <label for="b-artista">Artista</label>
+          <input type="text" id="b-artista" placeholder="filtrar por artista">
         </div>
-        <div class="form-group">
-          <label>Compositor</label>
-          <input type="text" id="b-compositor">
+        <div class="field">
+          <label for="b-compositor">Compositor</label>
+          <input type="text" id="b-compositor" placeholder="filtrar por compositor">
         </div>
-        <div class="form-group">
-          <label>Gênero</label>
-          <input type="text" id="b-genero">
+        <div class="field">
+          <label for="b-genero">Gênero</label>
+          <input type="text" id="b-genero" placeholder="filtrar por gênero">
         </div>
-        <div class="form-group">
-          <label>Ano</label>
-          <input type="number" id="b-ano">
+        <div class="field">
+          <label for="b-ano">Ano</label>
+          <input type="number" id="b-ano" placeholder="filtrar por ano">
         </div>
       </div>
       <div class="btn-row">
-        <button id="btnBuscar">Filtrar</button>
-        <button id="btnLimparBusca" class="secondary">Limpar Filtros</button>
+        <button class="primary" id="btnBuscar">Consultar</button>
+        <button class="ghost" id="btnLimparBusca" type="button">Limpar filtros</button>
       </div>
-      <div id="msgBuscar" class="msg"></div>
-      <div id="searchGrid" class="grid-cards"></div>
-    </div>
-
-    <!-- PAINEL DE LISTAGEM COMPLETA -->
-    <div class="panel">
-      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--border-color); padding-bottom: 8px; margin-bottom: 15px;">
-        <h2 style="margin:0; border:none; padding:0;">Acervo Completo</h2>
-        <span id="countText" style="font-size: 0.85rem; font-weight: bold;">0 fichas no acervo</span>
-      </div>
-      <div class="btn-row" style="margin-bottom: 10px;">
-        <button id="btnListar" class="secondary small">Atualizar Lista</button>
-      </div>
-      <div id="msgListar" class="msg"></div>
-      <div id="catalogGrid" class="grid-cards"></div>
-    </div>
+      <div class="msg" id="msgBuscar"></div>
+      <div class="catalog-grid" id="searchGrid" style="margin-top:1.2rem;"></div>
+    </section>
   </div>
 
-  <script>
-  (function(){
-    const API_BASE = '';
+  <!-- LISTAGEM / ACERVO -->
+  <div>
+    <span class="ribbon">Acervo Completo</span>
+    <section class="card">
+      <div class="catalog-toolbar">
+        <button id="btnListar">Atualizar lista do acervo</button>
+        <span class="count" id="countText">nenhuma ficha carregada</span>
+      </div>
+      <div class="msg" id="msgListar"></div>
+      <div class="catalog-grid" id="catalogGrid">
+        <div class="empty-note">Nenhuma música exibida ainda. Clique em "Atualizar lista do acervo" ou faça uma busca acima.</div>
+      </div>
+    </section>
+  </div>
 
-    const vinyl = document.getElementById('vinyl');
-    const catalogGrid = document.getElementById('catalogGrid');
-    const searchGrid = document.getElementById('searchGrid');
-    const countText = document.getElementById('countText');
+  <footer>arquivo sonoro &middot; fichário digital de acervo musical</footer>
+</div>
 
-    function base(){
-      return API_BASE.trim().replace(/\/+$/, '');
+<script>
+(function(){
+  // Endereço fixo da API. Como a página é servida pela própria API (wwwroot),
+  // deixamos em branco para usar o mesmo domínio/porta automaticamente.
+  // Se a tela for aberta separadamente (fora do projeto), troque para algo como
+  // 'http://localhost:8000'.
+  const API_BASE = '';
+
+  const vinyl = document.getElementById('vinyl');
+  const catalogGrid = document.getElementById('catalogGrid');
+  const searchGrid = document.getElementById('searchGrid');
+  const countText = document.getElementById('countText');
+
+  function base(){
+    return API_BASE.trim().replace(/\/+$/, '');
+  }
+
+  function showMsg(el, text, isError){
+    if(!el) return;
+    el.textContent = text;
+    el.classList.remove('ok','err');
+    el.classList.add('show', isError ? 'err' : 'ok');
+  }
+
+  function hideMsg(el){
+    if(el) el.classList.remove('show');
+  }
+
+  let inflight = 0;
+  function spinStart(){
+    inflight++;
+    if(vinyl) vinyl.classList.add('spinning');
+  }
+
+  function spinStop(){
+    inflight = Math.max(0, inflight - 1);
+    if(inflight === 0 && vinyl){
+      vinyl.classList.remove('spinning');
     }
+  }
 
-    function showMsg(el, text, isError){
-      if(!el) return;
-      el.textContent = text;
-      el.classList.remove('ok','err');
-      el.classList.add('show', isError ? 'err' : 'ok');
-    }
-
-    function hideMsg(el){
-      if(el) el.classList.remove('show');
-    }
-
-    let inflight = 0;
-    function spinStart(){
-      inflight++;
-      if(vinyl) vinyl.classList.add('spinning');
-    }
-
-    function spinStop(){
-      inflight = Math.max(0, inflight - 1);
-      if(inflight === 0 && vinyl){
-        vinyl.classList.remove('spinning');
+  async function api(path, options){
+    spinStart();
+    try{
+      const res = await fetch(base() + path, options);
+      let data = null;
+      try { data = await res.json(); } catch(e) { }
+      if(!res.ok){
+        const erro = (data && (data.erro || data.mensagem)) || ('Erro HTTP ' + res.status);
+        throw new Error(erro);
       }
+      return data;
+    } finally {
+      spinStop();
     }
+  }
 
-    async function api(path, options){
-      spinStart();
-      try{
-        const res = await fetch(base() + path, options);
-        let data = null;
-        try { data = await res.json(); } catch(e) { }
-        if(!res.ok){
-          const erro = (data && (data.erro || data.mensagem)) || ('Erro HTTP ' + res.status);
-          throw new Error(erro);
-        }
-        return data;
-      } finally {
-        spinStop();
-      }
-    }
+  function escapeHtml(str){
+    return String(str ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
 
-    function escapeHtml(str){
-      return String(str ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-    }
+  function discCardTemplate(m, showActions = true){
+    const div = document.createElement('div');
+    div.className = 'disc-card';
 
-    function discCardTemplate(m, showActions = true){
-      const div = document.createElement('div');
-      div.className = 'disc-card';
+    const id = m.Id ?? m.id;
+    const titulo = m.Titulo ?? m.titulo ?? '(sem título)';
+    const artista = m.Artista ?? m.artista ?? '—';
+    const compositor = m.Compositor ?? m.compositor ?? '—';
+    const genero = m.Genero ?? m.genero ?? '—';
+    const ano = m.Ano ?? m.ano ?? '—';
 
-      const id = m.Id ?? m.id;
-      const titulo = m.Titulo ?? m.titulo ?? '(sem título)';
-      const artista = m.Artista ?? m.artista ?? '—';
-      const compositor = m.Compositor ?? m.compositor ?? '—';
-      const genero = m.Genero ?? m.genero ?? '—';
-      const ano = m.Ano ?? m.ano ?? '—';
+    let html = `
+      <span class="badge-id">#${id}</span>
+      <h3>${escapeHtml(titulo)}</h3>
+      <div class="sub">
+        <strong>Artista:</strong> ${escapeHtml(artista)}<br>
+        <strong>Compositor:</strong> ${escapeHtml(compositor)}<br>
+        <strong>Gênero:</strong> ${escapeHtml(genero)} &middot; <strong>Ano:</strong> ${ano}
+      </div>
+    `;
 
-      let html = `
-        <span class="badge-id">#${id}</span>
-        <h3>${escapeHtml(titulo)}</h3>
-        <div class="sub">
-          <strong>Artista:</strong> ${escapeHtml(artista)}<br>
-          <strong>Compositor:</strong> ${escapeHtml(compositor)}<br>
-          <strong>Gênero:</strong> ${escapeHtml(genero)} &middot; <strong>Ano:</strong> ${ano}
+    if (showActions) {
+      html += `
+        <div class="edit-row">
+          <input type="text" placeholder="novo título" value="${escapeHtml(titulo)}">
+        </div>
+        <div class="actions">
+          <button class="small" data-action="salvar" data-id="${id}">Renomear título</button>
+          <button class="small danger" data-action="excluir" data-id="${id}">Excluir</button>
         </div>
       `;
-
-      if (showActions) {
-        html += `
-          <div class="edit-row">
-            <input type="text" placeholder="novo título" value="${escapeHtml(titulo)}">
-          </div>
-          <div class="actions">
-            <button class="small" data-action="salvar" data-id="${id}">Renomear título</button>
-            <button class="small danger" data-action="excluir" data-id="${id}">Excluir</button>
-          </div>
-        `;
-      }
-
-      div.innerHTML = html;
-      return div;
     }
 
-    function renderInto(grid, musicas, emptyText, showActions = true){
-      if(!grid) return;
-      grid.innerHTML = '';
-      if(!musicas || musicas.length === 0){
-        grid.innerHTML = `<div class="empty-note">${emptyText}</div>`;
+    div.innerHTML = html;
+    return div;
+  }
+
+  function renderInto(grid, musicas, emptyText, showActions = true){
+    if(!grid) return;
+    grid.innerHTML = '';
+    if(!musicas || musicas.length === 0){
+      grid.innerHTML = `<div class="empty-note">${emptyText}</div>`;
+      return;
+    }
+    musicas.forEach(m => grid.appendChild(discCardTemplate(m, showActions)));
+  }
+
+  function renderAcervo(musicas){
+    renderInto(catalogGrid, musicas, 'Nenhuma música no acervo ainda.', true);
+    if(countText) {
+      countText.textContent = (musicas ? musicas.length : 0) + ((musicas && musicas.length === 1) ? ' ficha no acervo' : ' fichas no acervo');
+    }
+  }
+
+  async function carregarAcervo(){
+    const msgEl = document.getElementById('msgListar');
+    try{
+      const data = await api('/Listar', { method:'GET' });
+      const lista = data?.musicascadastradas || data?.Musicascadastradas || [];
+      renderAcervo(lista);
+    } catch(err){
+      showMsg(msgEl, 'Falha ao carregar o acervo: ' + err.message, true);
+    }
+  }
+
+  // --- CADASTRAR ---
+  const btnCadastrar = document.getElementById('btnCadastrar');
+  if(btnCadastrar) {
+    btnCadastrar.addEventListener('click', async () => {
+      const msgEl = document.getElementById('msgCadastrar');
+      hideMsg(msgEl);
+      const titulo = document.getElementById('c-titulo').value.trim();
+      const compositor = document.getElementById('c-compositor').value.trim();
+      const artista = document.getElementById('c-artista').value.trim();
+      const genero = document.getElementById('c-genero').value.trim();
+      const ano = document.getElementById('c-ano').value;
+
+      if(!titulo || !artista){
+        showMsg(msgEl, 'Preencha ao menos título e artista antes de arquivar.', true);
         return;
       }
-      musicas.forEach(m => grid.appendChild(discCardTemplate(m, showActions)));
-    }
 
-    function renderAcervo(musicas){
-      renderInto(catalogGrid, musicas, 'Nenhuma música no acervo ainda.', true);
-      if(countText) {
-        countText.textContent = (musicas ? musicas.length : 0) + ((musicas && musicas.length === 1) ? ' ficha no acervo' : ' fichas no acervo');
-      }
-    }
-
-    async function carregarAcervo(){
-      const msgEl = document.getElementById('msgListar');
       try{
-        const data = await api('/Listar', { method:'GET' });
-        const lista = data?.musicascadastradas || data?.Musicascadastradas || [];
-        renderAcervo(lista);
-      } catch(err){
-        showMsg(msgEl, 'Falha ao carregar o acervo: ' + err.message, true);
-      }
-    }
+        const data = await api('/CadastrarMusica', {
+          method:'POST',
+          headers:{ 'Content-Type':'application/json' },
+          body: JSON.stringify({ titulo, compositor, artista, genero, ano: Number(ano) || 0 })
+        });
+        const m = data?.musica || data?.Musica;
+        const tituloSalvo = m?.Titulo || m?.titulo || titulo;
 
-    const btnCadastrar = document.getElementById('btnCadastrar');
-    if(btnCadastrar) {
-      btnCadastrar.addEventListener('click', async () => {
-        const msgEl = document.getElementById('msgCadastrar');
-        hideMsg(msgEl);
-        const titulo = document.getElementById('c-titulo').value.trim();
-        const compositor = document.getElementById('c-compositor').value.trim();
-        const artista = document.getElementById('c-artista').value.trim();
-        const genero = document.getElementById('c-genero').value.trim();
-        const ano = document.getElementById('c-ano').value;
-
-        if(!titulo || !artista){
-          showMsg(msgEl, 'Preencha ao menos título e artista antes de arquivar.', true);
-          return;
-        }
-
-        try{
-          const data = await api('/CadastrarMusica', {
-            method:'POST',
-            headers:{ 'Content-Type':'application/json' },
-            body: JSON.stringify({ titulo, compositor, artista, genero, ano: Number(ano) || 0 })
-          });
-          const m = data?.musica || data?.Musica;
-          const tituloSalvo = m?.Titulo || m?.titulo || titulo;
-
-          showMsg(msgEl, 'Música "' + tituloSalvo + '" cadastrada com sucesso.', false);
-          ['c-titulo','c-compositor','c-artista','c-genero','c-ano'].forEach(id => {
-            const el = document.getElementById(id);
-            if(el) el.value = '';
-          });
-          await carregarAcervo();
-        } catch(err){
-          showMsg(msgEl, 'Não foi possível arquivar: ' + err.message, true);
-        }
-      });
-    }
-
-    const btnLimparCadastro = document.getElementById('btnLimparCadastro');
-    if(btnLimparCadastro) {
-      btnLimparCadastro.addEventListener('click', () => {
+        showMsg(msgEl, 'Música "' + tituloSalvo + '" cadastrada com sucesso.', false);
         ['c-titulo','c-compositor','c-artista','c-genero','c-ano'].forEach(id => {
           const el = document.getElementById(id);
           if(el) el.value = '';
         });
-        hideMsg(document.getElementById('msgCadastrar'));
-      });
-    }
-
-    async function executarBusca(silencioso = false) {
-      const msgEl = document.getElementById('msgBuscar');
-      hideMsg(msgEl);
-
-      const params = new URLSearchParams();
-      const artista = document.getElementById('b-artista').value.trim();
-      const compositor = document.getElementById('b-compositor').value.trim();
-      const genero = document.getElementById('b-genero').value.trim();
-      const ano = document.getElementById('b-ano').value.trim();
-
-      if(artista) params.set('artista', artista);
-      if(compositor) params.set('compositor', compositor);
-      if(genero) params.set('genero', genero);
-      if(ano) params.set('ano', ano);
-
-      try{
-        const data = await api('/BuscarMusica?' + params.toString(), { method:'GET' });
-        const resultados = data?.musica || data?.Musica || [];
-        renderInto(searchGrid, resultados, 'Nenhuma música encontrada com esses filtros.', false);
+        await carregarAcervo();
       } catch(err){
-        if(!silencioso) {
-          showMsg(msgEl, 'Falha na consulta: ' + err.message, true);
-        }
+        showMsg(msgEl, 'Não foi possível arquivar: ' + err.message, true);
+      }
+    });
+  }
+
+  const btnLimparCadastro = document.getElementById('btnLimparCadastro');
+  if(btnLimparCadastro) {
+    btnLimparCadastro.addEventListener('click', () => {
+      ['c-titulo','c-compositor','c-artista','c-genero','c-ano'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.value = '';
+      });
+      hideMsg(document.getElementById('msgCadastrar'));
+    });
+  }
+
+  // --- BUSCAR ---
+  async function executarBusca(silencioso = false) {
+    const msgEl = document.getElementById('msgBuscar');
+    hideMsg(msgEl);
+
+    const params = new URLSearchParams();
+    const artista = document.getElementById('b-artista').value.trim();
+    const compositor = document.getElementById('b-compositor').value.trim();
+    const genero = document.getElementById('b-genero').value.trim();
+    const ano = document.getElementById('b-ano').value.trim();
+
+    if(artista) params.set('artista', artista);
+    if(compositor) params.set('compositor', compositor);
+    if(genero) params.set('genero', genero);
+    if(ano) params.set('ano', ano);
+
+    try{
+      const data = await api('/BuscarMusica?' + params.toString(), { method:'GET' });
+      const resultados = data?.musica || data?.Musica || [];
+      renderInto(searchGrid, resultados, 'Nenhuma música encontrada com esses filtros.', false);
+      if(!silencioso){
+        showMsg(msgEl, resultados.length + ' resultado(s) encontrado(s).', false);
+      }
+    } catch(err){
+      if(!silencioso) {
+        showMsg(msgEl, 'Falha na consulta: ' + err.message, true);
       }
     }
+  }
 
-    const btnBuscar = document.getElementById('btnBuscar');
-    if(btnBuscar) btnBuscar.addEventListener('click', () => executarBusca(false));
+  const btnBuscar = document.getElementById('btnBuscar');
+  if(btnBuscar) btnBuscar.addEventListener('click', () => executarBusca(false));
 
-    const btnLimparBusca = document.getElementById('btnLimparBusca');
-    if(btnLimparBusca) {
-      btnLimparBusca.addEventListener('click', () => {
-        ['b-artista','b-compositor','b-genero','b-ano'].forEach(id => {
-          const el = document.getElementById(id);
-          if(el) el.value = '';
-        });
-        hideMsg(document.getElementById('msgBuscar'));
-        if(searchGrid) searchGrid.innerHTML = '';
+  const btnLimparBusca = document.getElementById('btnLimparBusca');
+  if(btnLimparBusca) {
+    btnLimparBusca.addEventListener('click', () => {
+      ['b-artista','b-compositor','b-genero','b-ano'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.value = '';
       });
-    }
+      hideMsg(document.getElementById('msgBuscar'));
+      if(searchGrid) searchGrid.innerHTML = '';
+    });
+  }
 
-    const btnListar = document.getElementById('btnListar');
-    if(btnListar) {
-      btnListar.addEventListener('click', () => {
-        hideMsg(document.getElementById('msgListar'));
-        carregarAcervo();
-      });
-    }
+  // --- LISTAR ---
+  const btnListar = document.getElementById('btnListar');
+  if(btnListar) {
+    btnListar.addEventListener('click', () => {
+      hideMsg(document.getElementById('msgListar'));
+      carregarAcervo();
+    });
+  }
 
-    if(catalogGrid) {
-      catalogGrid.addEventListener('click', async (ev) => {
-        const btn = ev.target.closest('button[data-action]');
-        if(!btn) return;
+  // --- AÇÕES DO ACERVO COMPLETO ---
+  if(catalogGrid) {
+    catalogGrid.addEventListener('click', async (ev) => {
+      const btn = ev.target.closest('button[data-action]');
+      if(!btn) return;
 
-        const id = btn.getAttribute('data-id');
-        const action = btn.getAttribute('data-action');
-        const card = btn.closest('.disc-card');
-        const msgEl = document.getElementById('msgListar');
-        hideMsg(msgEl);
+      const id = btn.getAttribute('data-id');
+      const action = btn.getAttribute('data-action');
+      const card = btn.closest('.disc-card');
+      const msgEl = document.getElementById('msgListar');
+      hideMsg(msgEl);
 
-        if(action === 'salvar'){
-          const input = card.querySelector('input');
-          const novoTitulo = input ? input.value.trim() : '';
+      if(action === 'salvar'){
+        const input = card.querySelector('input');
+        const novoTitulo = input ? input.value.trim() : '';
 
-          if(!novoTitulo){
-            showMsg(msgEl, 'Informe um novo título antes de salvar.', true);
-            return;
-          }
-
-          try{
-            await api(`/AtualizarMusica/${id}/titulo`, {
-              method:'PATCH',
-              headers:{ 'Content-Type':'application/json' },
-              body: JSON.stringify({ titulo: novoTitulo })
-            });
-
-            showMsg(msgEl, `Nome da música #${id} atualizado com sucesso!`, false);
-            await carregarAcervo();
-
-            if(searchGrid && searchGrid.children.length > 0) {
-              executarBusca(true);
-            }
-          } catch(err){
-            showMsg(msgEl, 'Não foi possível atualizar: ' + err.message, true);
-          }
+        if(!novoTitulo){
+          showMsg(msgEl, 'Informe um novo título antes de salvar.', true);
+          return;
         }
 
-        if(action === 'excluir'){
-          if(!confirm('Remover esta ficha do acervo permanentemente?')) return;
-          try{
-            await api(`/DeletarMusica/${id}`, { method:'DELETE' });
-            showMsg(msgEl, 'Ficha nº ' + id + ' removida com sucesso.', false);
-            await carregarAcervo();
-            
-            if(searchGrid && searchGrid.children.length > 0) {
-              executarBusca(true);
-            }
-          } catch(err){
-            showMsg(msgEl, 'Não foi possível excluir: ' + err.message, true);
-          }
-        }
-      });
-    }
+        try{
+          await api(`/AtualizarMusica/${id}/titulo`, {
+            method:'PATCH',
+            headers:{ 'Content-Type':'application/json' },
+            body: JSON.stringify({ titulo: novoTitulo })
+          });
 
-    carregarAcervo();
-  })();
-  </script>
+          showMsg(msgEl, `Nome da música #${id} atualizado com sucesso!`, false);
+          await carregarAcervo();
+
+          if(searchGrid && searchGrid.children.length > 0) {
+            executarBusca(true);
+          }
+        } catch(err){
+          showMsg(msgEl, 'Não foi possível atualizar: ' + err.message, true);
+        }
+      }
+
+      if(action === 'excluir'){
+        if(!confirm('Remover esta ficha do acervo permanentemente?')) return;
+        try{
+          await api(`/DeletarMusica/${id}`, { method:'DELETE' });
+          showMsg(msgEl, 'Ficha nº ' + id + ' removida com sucesso.', false);
+          await carregarAcervo();
+
+          if(searchGrid && searchGrid.children.length > 0) {
+            executarBusca(true);
+          }
+        } catch(err){
+          showMsg(msgEl, 'Não foi possível excluir: ' + err.message, true);
+        }
+      }
+    });
+  }
+
+  carregarAcervo();
+})();
+</script>
 </body>
 </html>
